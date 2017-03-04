@@ -65,7 +65,7 @@
             this.listViewEdited.Size = new System.Drawing.Size(439, 230);
             this.listViewEdited.TabIndex = 4;
             this.listViewEdited.UseCompatibleStateImageBehavior = false;
-            this.listViewEdited.View = System.Windows.Forms.View.List;
+            this.listViewEdited.View = System.Windows.Forms.View.Details;
             // 
             // progressBarLoad
             // 
@@ -75,13 +75,13 @@
             this.progressBarLoad.TabIndex = 3;
             // 
             // listViewOrig
-            // 
+            //
             this.listViewOrig.Location = new System.Drawing.Point(3, 3);
             this.listViewOrig.Name = "listViewOrig";
             this.listViewOrig.Size = new System.Drawing.Size(439, 221);
             this.listViewOrig.TabIndex = 2;
             this.listViewOrig.UseCompatibleStateImageBehavior = false;
-            this.listViewOrig.View = System.Windows.Forms.View.List;
+            this.listViewOrig.View = System.Windows.Forms.View.Details;
             // 
             // buttonGenerate
             // 
