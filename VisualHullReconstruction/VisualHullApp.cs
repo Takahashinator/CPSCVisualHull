@@ -14,27 +14,41 @@ namespace VisualHullReconstruction
 {
     public partial class VisualHullApp : Form
     {
-        private const double Sidelength = 1000;
-        private OctNode root = new OctNode(Sidelength, new Point3D(0,0,0));
-        private ImageList imList; 
+        //Octospace constants
+        //Note: units of distance are given in millimeters
+        private const double Sidelength = 160;
+        private static readonly Point3D CameraPosition = new Point3D(0,-370, 147.5);
+
+
+        private OctNode _root = new OctNode(Sidelength, new Point3D(0,0,0)); //TODO change origin to center bottom of cube
+        private List<ViewPoint> _viewPointList;
+        private static readonly double[,] _kMatrix = new double[3,3] { {1095.826, 0, 351.289}, { 0, 1112.102, 678.420}, { 0, 0, 1} };
+
+        private GenerateForm genForm;
 
         public VisualHullApp()
         {
-            imList = new ImageList();
+            _viewPointList = new List<ViewPoint>();
             InitializeComponent();
 
-            ColumnHeader colHeader1 = new ColumnHeader
+            var colHeader1 = new ColumnHeader
             {
                 Text = "Filename",
-                Width = 200
+                Width = 100
             };
 
-            this.listViewOrig.Columns.AddRange(new[] { colHeader1});
+            var colHeader2 = new ColumnHeader
+            {
+                Text = "Path",
+                Width = 700
+            };
+
+            listViewOrig.Columns.AddRange(new[] { colHeader1, colHeader2 });
         }
 
         private void buttonLoadImages_Click(object sender, EventArgs e)
         {
-            OpenFileDialog dlg = new OpenFileDialog
+            var dlg = new OpenFileDialog
             {
                 Title = "Load Images",
                 Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png",
@@ -42,37 +56,42 @@ namespace VisualHullReconstruction
             };
 
 
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                foreach (var filename in dlg.FileNames)
-                {
-                    try
-                    {
-                        imList.Images.Add(Image.FromFile(filename));
+            if (dlg.ShowDialog() != DialogResult.OK) return;
 
-                        // Add the image name to the listview box
-                        listViewOrig.Items.Add(new ListViewItem(new[] { Path.GetFileName(filename), Path.GetDirectoryName(filename) }));
-                    }
-                    catch (SecurityException ex)
-                    {
-                        // The user lacks appropriate permissions to read files, discover paths, etc.
-                        MessageBox.Show("Security error. \n\n" +
-                            "Error message: " + ex.Message + "\n\n" +
-                            "Details (send to Support):\n\n" + ex.StackTrace
+            foreach (string filename in dlg.FileNames)
+            {
+                try
+                {
+                    //imList.Images.Add(Image.FromFile(filename));
+
+                    // Add the image name to the listview box
+                    listViewOrig.Items.Add(new ListViewItem(new[] { Path.GetFileName(filename), Path.GetFullPath(filename) }));
+                }
+                catch (SecurityException ex)
+                {
+                    // The user lacks appropriate permissions to read files, discover paths, etc.
+                    MessageBox.Show("Security error. \n\n" +
+                                    "Error message: " + ex.Message + "\n\n" +
+                                    "Details (send to Support):\n\n" + ex.StackTrace
                         );
-                    }
-                    catch (Exception ex)
-                    {
-                        // Could not load the image - probably related to Windows file system permissions.
-                        MessageBox.Show("Cannot load the image: " + filename.Substring(filename.LastIndexOf('\\'))
-                            + ". You may not have permission to read the file, or " +
-                            "it may be corrupt.\n\nReported error: " + ex.Message);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    // Could not load the image - probably related to Windows file system permissions.
+                    MessageBox.Show("Cannot load the image: " + filename.Substring(filename.LastIndexOf('\\'))
+                                    + ". You may not have permission to read the file, or " +
+                                    "it may be corrupt.\n\nReported error: " + ex.Message);
                 }
             }
         }
 
         private void buttonGenerate_Click(object sender, EventArgs e)
+        {
+            genForm = new GenerateForm(this);
+            genForm.Show();
+        }
+
+        private void buttonHull_Click(object sender, EventArgs e)
         {
             // Test Code
             //root.Split();
@@ -80,6 +99,15 @@ namespace VisualHullReconstruction
             //{
             //    listViewEdited.Items.Add(listViewItem);
             //}
+        }
+
+        /// <summary>
+        /// Used by Generate Form to get listview info
+        /// </summary>
+        /// <returns></returns>
+        public ListView GetListView()
+        {
+            return this.listViewOrig;
         }
     }
 }

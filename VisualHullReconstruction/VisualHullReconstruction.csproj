@@ -45,8 +45,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enums.cs" />
+    <Compile Include="GenerateForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GenerateForm.Designer.cs">
+      <DependentUpon>GenerateForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ImageAnalysis.cs" />
     <Compile Include="Point3D.cs" />
     <Compile Include="OctNode.cs" />
+    <Compile Include="ViewPoint.cs" />
     <Compile Include="VisualHullApp.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -55,6 +63,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="GenerateForm.resx">
+      <DependentUpon>GenerateForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="VisualHullApp.resx">
       <DependentUpon>VisualHullApp.cs</DependentUpon>
     </EmbeddedResource>
