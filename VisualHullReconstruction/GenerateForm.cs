@@ -13,6 +13,7 @@ namespace VisualHullReconstruction
     public partial class GenerateForm : Form
     {
         private VisualHullApp _parent;
+        private Bitmap _selectedImage;
 
         public GenerateForm(VisualHullApp parent)
         {
@@ -47,8 +48,8 @@ namespace VisualHullReconstruction
                 MessageBox.Show("Select an item from the list");
             else
             {
-                string disp = listView1.SelectedItems[0].SubItems[1].Text;
-                MessageBox.Show(disp);
+                if (_selectedImage == null)
+                    return;
 
                 // Image refImage = staticClass.setRefImage(path);
                 // foreach image in listview
@@ -58,6 +59,17 @@ namespace VisualHullReconstruction
                 // end foreach
             }
 
+        }
+
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listView1.SelectedItems.Count > 0)
+            {
+                string path = listView1.SelectedItems[0].SubItems[1].Text;
+                Bitmap greyIm = ImageAnalysis.ConvertGreyscale((Bitmap)Image.FromFile(path, true));
+                pictureBox1.Image = greyIm;
+                _selectedImage = greyIm;
+            }
         }
     }
 }
