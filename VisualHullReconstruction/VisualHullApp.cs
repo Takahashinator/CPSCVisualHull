@@ -25,6 +25,7 @@ namespace VisualHullReconstruction
         private static readonly double[,] _kMatrix = new double[3,3] { {1095.826, 0, 351.289}, { 0, 1112.102, 678.420}, { 0, 0, 1} };
 
         private GenerateForm genForm;
+        private TestForm testForm;
 
         public VisualHullApp()
         {
@@ -108,6 +109,12 @@ namespace VisualHullReconstruction
         public ListView GetListView()
         {
             return this.listViewOrig;
+        }
+
+        private void buttonOpenTester_Click(object sender, EventArgs e)
+        {
+            testForm = new TestForm();
+            testForm.Show();
         }
     }
 }

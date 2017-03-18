@@ -42,7 +42,7 @@ namespace VisualHullReconstruction
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void buttonRun_Click(object sender, EventArgs e)
         {
             if (listView1.SelectedItems.Count <= 0)
                 MessageBox.Show("Select an item from the list");

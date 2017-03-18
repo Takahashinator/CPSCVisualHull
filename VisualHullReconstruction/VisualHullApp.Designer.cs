@@ -38,6 +38,7 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.progressBarHull = new System.Windows.Forms.ProgressBar();
             this.buttonHull = new System.Windows.Forms.Button();
+            this.buttonOpenTester = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
@@ -133,11 +134,22 @@
             this.buttonHull.UseVisualStyleBackColor = true;
             this.buttonHull.Click += new System.EventHandler(this.buttonHull_Click);
             // 
+            // buttonOpenTester
+            // 
+            this.buttonOpenTester.Location = new System.Drawing.Point(171, 575);
+            this.buttonOpenTester.Name = "buttonOpenTester";
+            this.buttonOpenTester.Size = new System.Drawing.Size(123, 23);
+            this.buttonOpenTester.TabIndex = 7;
+            this.buttonOpenTester.Text = "Open Test Form";
+            this.buttonOpenTester.UseVisualStyleBackColor = true;
+            this.buttonOpenTester.Click += new System.EventHandler(this.buttonOpenTester_Click);
+            // 
             // VisualHullApp
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(469, 572);
+            this.ClientSize = new System.Drawing.Size(469, 607);
+            this.Controls.Add(this.buttonOpenTester);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Name = "VisualHullApp";
@@ -160,6 +172,7 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.ProgressBar progressBarHull;
         private System.Windows.Forms.Button buttonHull;
+        private System.Windows.Forms.Button buttonOpenTester;
     }
 }
 

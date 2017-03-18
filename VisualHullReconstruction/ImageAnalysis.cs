@@ -33,10 +33,52 @@ namespace VisualHullReconstruction
         /// </summary>
         /// <param name="im">The Binary silhouette image</param>
         /// <returns>the image where the value of the pixel indicates the max square size</returns>
-        static public Image BoundingSquaresCalc(Image im)
+        static public int[,] BoundingSquaresCalc(int[,] im, int width, int height)
         {
+            for (int i = width-2; i < 0; i--)
+            {
+                for (int j = 1; j < height; j++)
+                {
+                    if (im[j, i] == 1)
+                    {
+                        im[j, i] = Min(im[j - 1, i], im[j, i + 1], im[j - 1, i + 1]) + 1;
+                    }
+                }
+            }
+            return im;
+        }
 
-            return null;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="im"></param>
+        /// <returns></returns>
+        static public int[,] ConvertBinary(Bitmap im)
+        {
+            int[,] imarray = new int[im.Height,im.Width];
+            for (int i = 0; i < im.Width; i++)
+            {
+                for (int j = 0; j < im.Height; j++)
+                {
+                    if (im.GetPixel(i, j).Name.ToLower() != "ffffffff")
+                    {
+                        imarray[j, i] = 1;
+                    }
+                }
+            }
+            return imarray;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        static public int Min(int a, int b, int c)
+        {
+            return Math.Min(a, Math.Min(b, c));
         }
 
         /// <summary>

@@ -54,6 +54,12 @@
     <Compile Include="ImageAnalysis.cs" />
     <Compile Include="Point3D.cs" />
     <Compile Include="OctNode.cs" />
+    <Compile Include="TestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TestForm.Designer.cs">
+      <DependentUpon>TestForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ViewPoint.cs" />
     <Compile Include="VisualHullApp.cs">
       <SubType>Form</SubType>
@@ -65,6 +71,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="GenerateForm.resx">
       <DependentUpon>GenerateForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TestForm.resx">
+      <DependentUpon>TestForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="VisualHullApp.resx">
       <DependentUpon>VisualHullApp.cs</DependentUpon>
