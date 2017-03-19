@@ -35,7 +35,7 @@ namespace VisualHullReconstruction
         /// <returns>the image where the value of the pixel indicates the max square size</returns>
         static public int[,] BoundingSquaresCalc(int[,] im, int width, int height)
         {
-            for (int i = width-2; i < 0; i--)
+            for (int i = width-2; i >= 0; i--)
             {
                 for (int j = 1; j < height; j++)
                 {
