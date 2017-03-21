@@ -14,12 +14,12 @@ namespace VisualHullReconstruction
         public double Declination { get; private set; }
         public int[,] ImageMap { get; private set; }
 
-        public ViewPoint(int[,] im, Point3D p, double va, double dec)
+        public ViewPoint(int[,] im, Point3D p, double viewAngle, double declination)
         {
             ImageMap = im;
             Position = p;
-            ViewAngle = va;
-            Declination = dec;
+            ViewAngle = viewAngle;
+            Declination = declination;
         }
     }
 }

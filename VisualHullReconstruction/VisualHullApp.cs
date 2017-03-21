@@ -88,12 +88,68 @@ namespace VisualHullReconstruction
 
         private void buttonGenerate_Click(object sender, EventArgs e)
         {
-            genForm = new GenerateForm(this);
-            genForm.Show();
+            DialogResult result = MessageBox.Show("Sure", "Some Title", MessageBoxButtons.YesNo);
+            if (result == DialogResult.No)
+            {
+                genForm = new GenerateForm(this);
+                genForm.Show();
+            }
+            else
+            {
+                // Load from file
+                var dlg = new OpenFileDialog
+                {
+                    Title = "Load Images",
+                    Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png",
+                    Multiselect = true
+                };
+
+
+                if (dlg.ShowDialog() != DialogResult.OK) return;
+
+                foreach (string filename in dlg.FileNames)
+                {
+                    try
+                    {
+                        Bitmap tempBitmap = new Bitmap(filename);
+                        int[,] binImage = ImageAnalysis.ConvertBinary(tempBitmap);
+                        binImage = ImageAnalysis.BoundingSquaresCalc(binImage, tempBitmap.Width, tempBitmap.Height);
+
+                        // Get Camera angle
+                        // Get Camera Declination
+                        // Get Camera position in 3D space
+
+                        //_viewPointList.Add(new ViewPoint(binImage, ), ));
+
+                        // Add the image name to the listview box
+                        listViewEdited.Items.Add(new ListViewItem(new[] { Path.GetFileName(filename), Path.GetFullPath(filename) }));
+                    }
+                    catch (SecurityException ex)
+                    {
+                        // The user lacks appropriate permissions to read files, discover paths, etc.
+                        MessageBox.Show("Security error. \n\n" +
+                                        "Error message: " + ex.Message + "\n\n" +
+                                        "Details (send to Support):\n\n" + ex.StackTrace
+                            );
+                    }
+                    catch (Exception ex)
+                    {
+                        // Could not load the image - probably related to Windows file system permissions.
+                        MessageBox.Show("Cannot load the image: " + filename.Substring(filename.LastIndexOf('\\'))
+                                        + ". You may not have permission to read the file, or " +
+                                        "it may be corrupt.\n\nReported error: " + ex.Message);
+                    }
+                }
+            }
+
         }
 
         private void buttonHull_Click(object sender, EventArgs e)
         {
+            if (listViewEdited.Items.Count == 0)
+            {
+                MessageBox.Show("No Sillhouette images loaded!");
+            }
             // Test Code
             //root.Split();
             //foreach (var listViewItem in root.Children.Select(node => new ListViewItem(node.Point.ToString())))
