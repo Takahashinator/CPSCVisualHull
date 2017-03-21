@@ -16,7 +16,7 @@ namespace VisualHullReconstruction
 
         public OctNode(double sidelength, Point3D p)
         {
-            state = OctoState.F;
+            state = OctoState.Full;
             _sideLength = sidelength;
             Point = p;
             Children = null;

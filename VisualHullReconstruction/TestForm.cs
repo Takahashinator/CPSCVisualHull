@@ -35,6 +35,12 @@ namespace VisualHullReconstruction
             pass = TestBoundingSquares();
             AddLine("Test Bounding Squares... " + (pass ? "success!" : "failed!"));
 
+            pass = false;
+            AddLine("");
+            AddLine("Starting TestCalculatePosition...");
+            pass = TestCalculatePoistion();
+            AddLine("Test Position Calculations... " + (pass ? "success!" : "failed!"));
+
         }
 
         private void AddLine(string text)
@@ -215,6 +221,52 @@ namespace VisualHullReconstruction
             catch (Exception e)
             {
                 AddLine("Error in TestBoundingSquares!");
+                AddLine(e.Message);
+                return false;
+            }
+        }
+
+        private bool TestCalculatePoistion()
+        {
+            try
+            {
+                bool success = false;
+
+                List<bool> tests = new List<bool>();
+                Point3D initialPosition = new Point3D(0, 10, -50);
+                Point3D point = ImageAnalysis.Calculate3DPosition(0, initialPosition);
+                tests.Add(point.X == initialPosition.X && point.Y == initialPosition.Y && point.Z == initialPosition.Z);
+
+                point = ImageAnalysis.Calculate3DPosition(90, initialPosition);
+                tests.Add(point.X == -50 && point.Y == initialPosition.Y && point.Z == 0);
+
+                point = ImageAnalysis.Calculate3DPosition(180, initialPosition);
+                tests.Add(point.X == 0 && point.Y == initialPosition.Y && point.Z == 50);
+
+                point = ImageAnalysis.Calculate3DPosition(270, initialPosition);
+                tests.Add(point.X == 50 && point.Y == initialPosition.Y && point.Z == 0);
+
+                int fails = 0;
+                for (int i = 0; i < tests.Count; i++)
+                {
+                    if (tests[i] == false)
+                    {
+                        AddLine("Fail on test # " + i);
+                        fails++;
+                    }
+                }
+
+                AddLine("TestCalculatePosition completed. Found " + fails + " failures.");
+                if (fails == 0)
+                {
+                    success = true;
+                }
+
+                return success;
+            }
+            catch (Exception e)
+            {
+                AddLine("Error in TestConvertBinary!");
                 AddLine(e.Message);
                 return false;
             }

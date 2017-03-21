@@ -9,6 +9,7 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
 
 namespace VisualHullReconstruction
 {
@@ -16,8 +17,11 @@ namespace VisualHullReconstruction
     {
         //Octospace constants
         //Note: units of distance are given in millimeters
+        //Coordinate Axis X = left-, +right,
+        //Y = up+ and -down 
+        // Z = forwards+, -backwards
         private const double Sidelength = 160;
-        private static readonly Point3D CameraPosition = new Point3D(0,-370, 147.5);
+        private static readonly Point3D CameraInitialPosition = new Point3D(0, 100, -370);
 
 
         private OctNode _root = new OctNode(Sidelength, new Point3D(0,0,0)); //TODO change origin to center bottom of cube
@@ -88,7 +92,7 @@ namespace VisualHullReconstruction
 
         private void buttonGenerate_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Sure", "Some Title", MessageBoxButtons.YesNo);
+            DialogResult result = MessageBox.Show("Load Sillhouette images from file?", "Load Dialog", MessageBoxButtons.YesNo);
             if (result == DialogResult.No)
             {
                 genForm = new GenerateForm(this);
@@ -111,15 +115,22 @@ namespace VisualHullReconstruction
                 {
                     try
                     {
+                        string name = Path.GetFileNameWithoutExtension(filename);
                         Bitmap tempBitmap = new Bitmap(filename);
                         int[,] binImage = ImageAnalysis.ConvertBinary(tempBitmap);
                         binImage = ImageAnalysis.BoundingSquaresCalc(binImage, tempBitmap.Width, tempBitmap.Height);
 
-                        // Get Camera angle
-                        // Get Camera Declination
-                        // Get Camera position in 3D space
+                        // Get Camera angle contained in the filename
+                        string angleString = string.Join(string.Empty, Regex.Matches(name, @"\d+").OfType<Match>().Select(m => m.Value));
+                        double angle = Convert.ToDouble(angleString);
 
-                        //_viewPointList.Add(new ViewPoint(binImage, ), ));
+                        // Camera Declination is constant across all images
+                        double dec = 11.55;
+
+                        // Get Camera position in 3D space
+                        Point3D position = ImageAnalysis.Calculate3DPosition(angle, CameraInitialPosition); 
+
+                        _viewPointList.Add(new ViewPoint(binImage, position, angle, dec));
 
                         // Add the image name to the listview box
                         listViewEdited.Items.Add(new ListViewItem(new[] { Path.GetFileName(filename), Path.GetFullPath(filename) }));

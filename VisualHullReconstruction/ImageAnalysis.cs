@@ -121,5 +121,24 @@ namespace VisualHullReconstruction
             g.Dispose();
             return newBitmap;
         }
+
+        /// <summary>
+        /// Calculates the camera location based on the given angle
+        /// </summary>
+        /// <param name="angle"></param>
+        /// <param name="camInitialPosition"></param>
+        /// <returns></returns>
+        static public Point3D Calculate3DPosition(double angle, Point3D camInitialPosition)
+        {
+            double angleRad = (Math.PI / 180) * (angle - 180);
+
+            double x = Math.Abs(camInitialPosition.Z) * Math.Sin(angleRad);             
+            double z = Math.Abs(camInitialPosition.Z) * Math.Cos(angleRad);
+
+            //check for very small inputs
+            x = (x <= 1e-5 && x >= -1e-5) ? 0 : x;
+            z = (z <= 1e-5 && z >= -1e-5) ? 0 : z;
+            return new Point3D(x, camInitialPosition.Y, z);
+        }
     }
 }

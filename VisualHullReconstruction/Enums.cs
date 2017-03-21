@@ -2,8 +2,8 @@
 {
     public enum OctoState
     {
-        E = 0, // empty
-        F = 1, // full
-        A = 2 // ambiguous
+        Empty = 0, // empty
+        Full = 1, // full
+        Ambiguous = 2 // ambiguous
     };
 }
