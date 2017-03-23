@@ -20,11 +20,11 @@ namespace VisualHullReconstruction
         //Coordinate Axis X = left-, +right,
         //Y = up+ and -down 
         // Z = forwards+, -backwards
-        private const double Sidelength = 160;
+        private const double Sidelength = 160; // Max sidelength of the volume cube
         private static readonly Point3D CameraInitialPosition = new Point3D(0, 100, -370);
 
 
-        private OctNode _root = new OctNode(Sidelength, new Point3D(0,0,0)); //TODO change origin to center bottom of cube
+        private OctNode _root = new OctNode(Sidelength, new Point3D(0,0,0));
         private List<ViewPoint> _viewPointList;
         private static readonly double[,] _kMatrix = new double[3,3] { {1095.826, 0, 351.289}, { 0, 1112.102, 678.420}, { 0, 0, 1} };
 
@@ -157,10 +157,13 @@ namespace VisualHullReconstruction
 
         private void buttonHull_Click(object sender, EventArgs e)
         {
-            if (listViewEdited.Items.Count == 0)
+            _root.Split();
+            if (listViewEdited.Items.Count == 0 || _viewPointList.Count == 0)
             {
                 MessageBox.Show("No Sillhouette images loaded!");
             }
+
+
             // Test Code
             //root.Split();
             //foreach (var listViewItem in root.Children.Select(node => new ListViewItem(node.Point.ToString())))

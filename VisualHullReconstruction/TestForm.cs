@@ -41,6 +41,12 @@ namespace VisualHullReconstruction
             pass = TestCalculatePoistion();
             AddLine("Test Position Calculations... " + (pass ? "success!" : "failed!"));
 
+            pass = false;
+            AddLine("");
+            AddLine("Starting TestOctnodeSplit...");
+            pass = TestOctnodeSplit();
+            AddLine("Test Octnode Split... " + (pass ? "success!" : "failed!"));
+
         }
 
         private void AddLine(string text)
@@ -110,7 +116,7 @@ namespace VisualHullReconstruction
                         fails++;
                     }
                 }
-                
+
                 AddLine("TestConvertBinary completed. Found " + fails + " failures.");
                 if (fails == 0)
                 {
@@ -180,7 +186,7 @@ namespace VisualHullReconstruction
                     /*19*/{1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
                 };
                 // Convert
-                int[,] intArray = ImageAnalysis.BoundingSquaresCalc(testBinaryImage, 20,20);
+                int[,] intArray = ImageAnalysis.BoundingSquaresCalc(testBinaryImage, 20, 20);
                 // Check for failures
 
                 List<bool> tests = new List<bool>
@@ -238,13 +244,13 @@ namespace VisualHullReconstruction
                 tests.Add(point.X == initialPosition.X && point.Y == initialPosition.Y && point.Z == initialPosition.Z);
 
                 point = ImageAnalysis.Calculate3DPosition(90, initialPosition);
-                tests.Add(point.X == -50 && point.Y == initialPosition.Y && point.Z == 0);
+                tests.Add(point.X == 50 && point.Y == initialPosition.Y && point.Z == 0);
 
                 point = ImageAnalysis.Calculate3DPosition(180, initialPosition);
                 tests.Add(point.X == 0 && point.Y == initialPosition.Y && point.Z == 50);
 
                 point = ImageAnalysis.Calculate3DPosition(270, initialPosition);
-                tests.Add(point.X == 50 && point.Y == initialPosition.Y && point.Z == 0);
+                tests.Add(point.X == -50 && point.Y == initialPosition.Y && point.Z == 0);
 
                 int fails = 0;
                 for (int i = 0; i < tests.Count; i++)
@@ -267,6 +273,63 @@ namespace VisualHullReconstruction
             catch (Exception e)
             {
                 AddLine("Error in TestConvertBinary!");
+                AddLine(e.Message);
+                return false;
+            }
+        }
+
+        private bool TestOctnodeSplit()
+        {
+            try
+            {
+                bool success = false;
+
+                OctNode root = new OctNode(100, new Point3D(50,0,50)); // Test based on a corner coordinate system for simplicity
+                root.Split();
+
+                List<bool> tests = new List<bool>();
+
+                tests.Add(root.Children.Count != 0);
+                tests.Add(root.Children.Count == 8);
+                tests.Add(root.Children[0].Point.X == 25);
+                tests.Add(root.Children[0].Point.Y == 0);
+                tests.Add(root.Children[0].Point.Z == 25);
+                tests.Add(root.Children[7].Point.X == 75);
+                tests.Add(root.Children[7].Point.Y == 50);
+                tests.Add(root.Children[7].Point.Z == 75);
+
+                root.Children[1].Split();
+
+                tests.Add(root.Children[1].Children.Count != 0);
+                tests.Add(root.Children[1].Children.Count == 8);
+                tests.Add(root.Children[1].Children[1].Point.X == 87.5);
+                tests.Add(root.Children[1].Children[1].Point.Y == 0);
+                tests.Add(root.Children[1].Children[1].Point.Z == 12.5);
+                tests.Add(root.Children[1].Children[6].Point.X == 62.5);
+                tests.Add(root.Children[1].Children[6].Point.Y == 25);
+                tests.Add(root.Children[1].Children[6].Point.Z == 37.5);
+
+                int fails = 0;
+                for (int i = 0; i < tests.Count; i++)
+                {
+                    if (tests[i] == false)
+                    {
+                        AddLine("Fail on test # " + i);
+                        fails++;
+                    }
+                }
+
+                AddLine("TestOctnodeSplit completed. Found " + fails + " failures.");
+                if (fails == 0)
+                {
+                    success = true;
+                }
+
+                return success;
+            }
+            catch (Exception e)
+            {
+                AddLine("Error in TestOctnodeSplit!");
                 AddLine(e.Message);
                 return false;
             }

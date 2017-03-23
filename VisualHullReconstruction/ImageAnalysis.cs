@@ -130,7 +130,7 @@ namespace VisualHullReconstruction
         /// <returns></returns>
         static public Point3D Calculate3DPosition(double angle, Point3D camInitialPosition)
         {
-            double angleRad = (Math.PI / 180) * (angle - 180);
+            double angleRad = (Math.PI / 180) * (180 - angle);
 
             double x = Math.Abs(camInitialPosition.Z) * Math.Sin(angleRad);             
             double z = Math.Abs(camInitialPosition.Z) * Math.Cos(angleRad);

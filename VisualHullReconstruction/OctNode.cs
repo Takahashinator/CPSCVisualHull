@@ -10,13 +10,13 @@ namespace VisualHullReconstruction
     class OctNode
     {
         public List<OctNode> Children; 
-        public Point3D Point;
+        public Point3D Point; // Cube "point" is defined as the center of the bottom face of the cube
         private readonly double _sideLength;
         private OctoState state;
 
         public OctNode(double sidelength, Point3D p)
         {
-            state = OctoState.Full;
+            state = OctoState.Full; // The volume is assumed to be full unless proven otherwise
             _sideLength = sidelength;
             Point = p;
             Children = null;
@@ -34,16 +34,16 @@ namespace VisualHullReconstruction
             for (int i = 0; i < 8; i++)
             {
                 // TODO -> is there a better way to do this?
-                var offsetx = (i & (1 << 0)) * _sideLength / 2;
-                var offsety = ((i & (1 << 1)) >> 1) * _sideLength / 2;
-                var offsetz = ((i & (1 << 2)) >> 2) * _sideLength / 2;
+                double offsetx = (i%2 == 0? -1 : 1) * _sideLength / 4;
+                double offsety = ((i & (1 << 1)) >> 1) * _sideLength/2;
+                double offsetz = (i < 4? -1 : 1) * _sideLength / 4;
                 Children.Add(new OctNode(_sideLength/2, 
-                    new Point3D(Point.X + offsetx, Point.Y + offsety, Point.Z +offsetz )));
+                    new Point3D(Point.X + offsetx, Point.Y + offsety, Point.Z + offsetz )));
             }
         }
 
         /// <summary>
-        /// Checks the whole tree and compacts any all empty or full nodes into one
+        /// Checks the whole sub-tree and compacts any all empty or full nodes into one
         /// </summary>
         public void Compact()
         {
