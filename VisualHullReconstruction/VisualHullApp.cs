@@ -157,7 +157,6 @@ namespace VisualHullReconstruction
 
         private void buttonHull_Click(object sender, EventArgs e)
         {
-            _root.Split();
             if (listViewEdited.Items.Count == 0 || _viewPointList.Count == 0)
             {
                 MessageBox.Show("No Sillhouette images loaded!");
