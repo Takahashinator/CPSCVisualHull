@@ -20,7 +20,7 @@ namespace VisualHullReconstruction
         //Coordinate Axis X = left-, +right,
         //Y = up+ and -down 
         // Z = forwards+, -backwards
-        private const double Sidelength = 160; // Max sidelength of the volume cube
+        private const double Sidelength = 189; // Max sidelength of the volume cube
         private static readonly Point3D CameraInitialPosition = new Point3D(0, 100, -370);
 
 

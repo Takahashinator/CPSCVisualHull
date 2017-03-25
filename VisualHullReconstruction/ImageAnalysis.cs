@@ -166,23 +166,27 @@ namespace VisualHullReconstruction
             double R33 = Math.Cos(beta)*Math.Cos(dec);
 
             // Multiply K Matrix to get P variables
-            double p11 = kmatrix[0, 0]*R11 + kmatrix[0,1]*R21 + kmatrix[0, 2]*R31;
-            double p12 = kmatrix[0, 0]*R12 + kmatrix[0, 1]*R22 + kmatrix[0, 2]*R32;
-            double p13 = kmatrix[0, 0]*R13 + kmatrix[0, 1]*R23 + kmatrix[0, 2]*R33;
-            double p14 = kmatrix[0, 0]*viewPoint.Position.X + kmatrix[0, 1]*viewPoint.Position.Y + kmatrix[0, 2]*viewPoint.Position.Z;
-            double p21 = kmatrix[0, 1]*R21 + kmatrix[0, 2]*R31;
-            double p22 = kmatrix[0, 1]*R22 + kmatrix[0, 2]*R32;
-            double p23 = kmatrix[0, 1]*R23 + kmatrix[0, 2]*R33;
-            double p24 = kmatrix[0, 1]*viewPoint.Position.Y + kmatrix[0, 2]*viewPoint.Position.Z;
+            double p11 = kmatrix[0, 0] * R11 + kmatrix[0, 1] * R21 + kmatrix[0, 2] * R31;
+            double p12 = kmatrix[0, 0] * R12 + kmatrix[0, 1] * R22 + kmatrix[0, 2] * R32;
+            double p13 = kmatrix[0, 0] * R13 + kmatrix[0, 1] * R23 + kmatrix[0, 2] * R33;
+            double p14 = kmatrix[0, 0] * viewPoint.Position.X + kmatrix[0, 1] * viewPoint.Position.Y + kmatrix[0, 2] * viewPoint.Position.Z;
+            double p21 = kmatrix[0, 1] * R21 + kmatrix[0, 2] * R31;
+            double p22 = kmatrix[0, 1] * R22 + kmatrix[0, 2] * R32;
+            double p23 = kmatrix[0, 1] * R23 + kmatrix[0, 2] * R33;
+            double p24 = kmatrix[0, 1] * viewPoint.Position.Y + kmatrix[0, 2] * viewPoint.Position.Z;
             double p31 = R31;
             double p32 = R32;
             double p33 = R33;
             double p34 = viewPoint.Position.Z;
 
             // Perform calculations for x and y pixels
-            point2D.X = Convert.ToInt32(p11*p.X + p12*p.Y + p13*p.Z + p14);
-            point2D.Y = Convert.ToInt32(p21*p.X + p22*p.Y + p23*p.Z + p24);
-            bool check = (1 == Convert.ToInt32(p31*p.X + p32*p.Y + p33*p.Z + p34));
+            double kx = p11*p.X + p12*p.Y + p13*p.Z + p14;
+            double ky = p21*p.X + p22*p.Y + p23*p.Z + p24;
+            double k = p31*p.X + p32*p.Y + p33*p.Z + p34;
+
+            //ATTEMPT #2
+            point2D.X = Convert.ToInt32(kx/k);
+            point2D.Y = Convert.ToInt32(ky/k);
 
             return point2D;
         }

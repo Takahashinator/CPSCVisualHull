@@ -47,6 +47,12 @@ namespace VisualHullReconstruction
             pass = TestOctnodeSplit();
             AddLine("Test Octnode Split... " + (pass ? "success!" : "failed!"));
 
+            pass = false;
+            AddLine("");
+            AddLine("Starting Test3D2D...");
+            pass = Test3D2D();
+            AddLine("Test Test3D2D... " + (pass ? "success!" : "failed!"));
+
         }
 
         private void AddLine(string text)
@@ -330,6 +336,56 @@ namespace VisualHullReconstruction
             catch (Exception e)
             {
                 AddLine("Error in TestOctnodeSplit!");
+                AddLine(e.Message);
+                return false;
+            }
+        }
+
+        private bool Test3D2D()
+        {
+            try
+            {
+                bool success = false;
+
+                // Constants
+                Point3D cameraInitialPosition = new Point3D(0, 100, -370);
+                double[,] kMatrix = new double[3, 3] {{1095.826, 0, 351.289}, {0, 1112.102, 678.420}, {0, 0, 1}};
+
+                // Call 3D->2D on an image with a known pixel location
+                string path = Directory.GetCurrentDirectory() + "\\calibrationimg.jpg";
+                // Read in test image
+                Bitmap testImage = new Bitmap(path);
+
+                double angle = 0;
+                Point3D spaceLocation = new Point3D(0, 0, -94.5); // Point to follow
+                //Point3D cameraPosition = ImageAnalysis.Calculate3DPosition(angle, cameraInitialPosition); 
+                ViewPoint vp = new ViewPoint(null, cameraInitialPosition, angle, 11.55);
+                Point point2D = ImageAnalysis.To2DPoint(spaceLocation, vp, kMatrix);
+
+                if (point2D.X < 0 || point2D.X > testImage.Width || point2D.Y < 0 || point2D.Y > testImage.Height)
+                    return false;
+
+                // Draw a little marker at the given location
+                int size = -20;
+                for (int i = 0; i < -size; i++)
+                {
+                    for (int j = 0; j < -size; j++)
+                    {
+                        testImage.SetPixel(point2D.X + i, point2D.Y + j, Color.Blue);
+                    }
+                }
+
+                pictureBox1.Image = testImage;
+
+                DialogResult result = MessageBox.Show("Dot at correct Location?", "Check Dialog", MessageBoxButtons.YesNo);
+                success = result != DialogResult.No;
+
+                return success;
+
+            }
+            catch (Exception e)
+            {
+                AddLine("Error in Test2D3D!");
                 AddLine(e.Message);
                 return false;
             }
