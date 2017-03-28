@@ -366,7 +366,7 @@ namespace VisualHullReconstruction
                     return false;
 
                 // Draw a little marker at the given location
-                int size = -20;
+                int size = -15;
                 for (int i = 0; i < -size; i++)
                 {
                     for (int j = 0; j < -size; j++)
@@ -379,6 +379,33 @@ namespace VisualHullReconstruction
 
                 DialogResult result = MessageBox.Show("Dot at correct Location?", "Check Dialog", MessageBoxButtons.YesNo);
                 success = result != DialogResult.No;
+
+                if (success)
+                {
+                    for (int i = 10; i < 360; i += 10)
+                    {
+                        // Do further testing with rotations
+                        Point3D cameraPosition = ImageAnalysis.Calculate3DPosition(i, cameraInitialPosition);
+                        vp = new ViewPoint(null, cameraPosition, i, 11.55);
+                        point2D = ImageAnalysis.To2DPoint(spaceLocation, vp, kMatrix);
+
+                        if (point2D.X < 0 || point2D.X > testImage.Width || point2D.Y < 0 || point2D.Y > testImage.Height)
+                            return false;
+
+                        // Draw a little marker at the given location
+                        for (int j = 0; j < -size; j++)
+                        {
+                            for (int k = 0; k < -size; k++)
+                            {
+                                testImage.SetPixel(point2D.X + j, point2D.Y + k, Color.Blue);
+                            }
+                        }
+
+                        pictureBox1.Image = testImage;
+                    }
+                    result = MessageBox.Show("Do the dots follow the right trajectory?", "Check Dialog", MessageBoxButtons.YesNo);
+                    success = result != DialogResult.No;
+                }
 
                 return success;
 

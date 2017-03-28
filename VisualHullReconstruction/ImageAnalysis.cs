@@ -169,15 +169,18 @@ namespace VisualHullReconstruction
             double p11 = kmatrix[0, 0] * R11 + kmatrix[0, 1] * R21 + kmatrix[0, 2] * R31;
             double p12 = kmatrix[0, 0] * R12 + kmatrix[0, 1] * R22 + kmatrix[0, 2] * R32;
             double p13 = kmatrix[0, 0] * R13 + kmatrix[0, 1] * R23 + kmatrix[0, 2] * R33;
-            double p14 = kmatrix[0, 0] * viewPoint.Position.X + kmatrix[0, 1] * viewPoint.Position.Y + kmatrix[0, 2] * viewPoint.Position.Z;
-            double p21 = kmatrix[0, 1] * R21 + kmatrix[0, 2] * R31;
-            double p22 = kmatrix[0, 1] * R22 + kmatrix[0, 2] * R32;
-            double p23 = kmatrix[0, 1] * R23 + kmatrix[0, 2] * R33;
-            double p24 = kmatrix[0, 1] * viewPoint.Position.Y + kmatrix[0, 2] * viewPoint.Position.Z;
+            double p14 = viewPoint.Position.X * p11 + viewPoint.Position.Y * p12 + viewPoint.Position.Z * p13;
+            //double p14 = kmatrix[0, 0] * viewPoint.Position.X + kmatrix[0, 1] * viewPoint.Position.Y + kmatrix[0, 2] * viewPoint.Position.Z;
+            double p21 = kmatrix[1, 1] * R21 + kmatrix[1, 2] * R31;
+            double p22 = kmatrix[1, 1] * R22 + kmatrix[1, 2] * R32; 
+            double p23 = kmatrix[1, 1] * R23 + kmatrix[1, 2] * R33; 
+            double p24 = viewPoint.Position.X * p21 + viewPoint.Position.Y * p22 + viewPoint.Position.Z * p23;
+            //double p24 = kmatrix[0, 1] * viewPoint.Position.Y + kmatrix[0, 2] * viewPoint.Position.Z;
             double p31 = R31;
             double p32 = R32;
             double p33 = R33;
-            double p34 = viewPoint.Position.Z;
+            double p34 = viewPoint.Position.X * p31 + viewPoint.Position.Y * p32 + viewPoint.Position.Z * p33;
+            //double p34 = viewPoint.Position.Z;
 
             // Perform calculations for x and y pixels
             double kx = p11*p.X + p12*p.Y + p13*p.Z + p14;
