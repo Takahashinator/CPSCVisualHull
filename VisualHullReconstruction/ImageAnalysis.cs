@@ -150,9 +150,15 @@ namespace VisualHullReconstruction
         /// <returns>A pixel location</returns>
         static public Point To2DPoint(Point3D p, ViewPoint viewPoint, double[,] kmatrix)
         {
+            // NOTE we negate the z axis to get proper camera coordinates
             Point point2D = new Point();
             double beta = (Math.PI / 180)*viewPoint.ViewAngle; // beta = y axis rotation angle
-            double dec = -(Math.PI/180)*viewPoint.Declination;
+            double dec = (Math.PI/180)*viewPoint.Declination;
+
+            // Calculate point transform position
+            double tx = -viewPoint.Position.X; //- viewPoint.Position.X;
+            double ty = -viewPoint.Position.Y; //- viewPoint.Position.Y;
+            double tz = -viewPoint.Position.Z;// - viewPoint.Position.Z;
 
             // R Matrix Variables
             double R11 = Math.Cos(beta);
@@ -165,31 +171,65 @@ namespace VisualHullReconstruction
             double R32 = Math.Cos(beta)*Math.Sin(dec);
             double R33 = Math.Cos(beta)*Math.Cos(dec);
 
-            // Multiply K Matrix to get P variables
-            double p11 = kmatrix[0, 0] * R11 + kmatrix[0, 1] * R21 + kmatrix[0, 2] * R31;
-            double p12 = kmatrix[0, 0] * R12 + kmatrix[0, 1] * R22 + kmatrix[0, 2] * R32;
-            double p13 = kmatrix[0, 0] * R13 + kmatrix[0, 1] * R23 + kmatrix[0, 2] * R33;
-            double p14 = viewPoint.Position.X * p11 + viewPoint.Position.Y * p12 + viewPoint.Position.Z * p13;
-            //double p14 = kmatrix[0, 0] * viewPoint.Position.X + kmatrix[0, 1] * viewPoint.Position.Y + kmatrix[0, 2] * viewPoint.Position.Z;
-            double p21 = kmatrix[1, 1] * R21 + kmatrix[1, 2] * R31;
-            double p22 = kmatrix[1, 1] * R22 + kmatrix[1, 2] * R32; 
-            double p23 = kmatrix[1, 1] * R23 + kmatrix[1, 2] * R33; 
-            double p24 = viewPoint.Position.X * p21 + viewPoint.Position.Y * p22 + viewPoint.Position.Z * p23;
-            //double p24 = kmatrix[0, 1] * viewPoint.Position.Y + kmatrix[0, 2] * viewPoint.Position.Z;
-            double p31 = R31;
-            double p32 = R32;
-            double p33 = R33;
-            double p34 = viewPoint.Position.X * p31 + viewPoint.Position.Y * p32 + viewPoint.Position.Z * p33;
-            //double p34 = viewPoint.Position.Z;
+            // Calculate transformed 3D position
+            double Mprimex = R11 * p.X + R21 * p.Y + R31 * p.Z + tx;
+            double Mprimey = R12 * p.X + R22 * p.Y + R32 * p.Z + ty;
+            double Mprimez = R13 * p.X + R23 * p.Y + R33 * p.Z + tz;
+
+            //double px = (Mprimex / -Mprimez) * kmatrix[0, 0] + kmatrix[0, 2];
+            //double py = (Mprimey / -Mprimez) * kmatrix[1, 1] + kmatrix[1, 2];
 
             // Perform calculations for x and y pixels
-            double kx = p11*p.X + p12*p.Y + p13*p.Z + p14;
-            double ky = p21*p.X + p22*p.Y + p23*p.Z + p24;
-            double k = p31*p.X + p32*p.Y + p33*p.Z + p34;
+            double kx = kmatrix[0, 0] * Mprimex + kmatrix[0, 2] * Mprimez;
+            double ky = kmatrix[1, 1] * Mprimey + kmatrix[1, 2] * Mprimez;
+            //double k = Mprime13
+            //point2D.X = Convert.ToInt32(px);// Convert.ToInt32(kx / Mprimez);
+            //point2D.Y = Convert.ToInt32(py);//Convert.ToInt32(ky / Mprimez);
+            point2D.X = Convert.ToInt32(kx / Mprimez);
+            point2D.Y = Convert.ToInt32(ky / Mprimez);
 
-            //ATTEMPT #2
-            point2D.X = Convert.ToInt32(kx/k);
-            point2D.Y = Convert.ToInt32(ky/k);
+
+            // THIS WORKS FOR A VERY SPECIFIC POINT!
+
+                //// NOTE we negate the z axis to get proper camera coordinates
+                //Point point2D = new Point();
+                //double beta = (Math.PI / 180) * viewPoint.ViewAngle; // beta = y axis rotation angle
+                //double dec = -(Math.PI / 180) * viewPoint.Declination;
+
+                //// Calculate point transform position
+                //double tx = viewPoint.Position.X; //- viewPoint.Position.X;
+                //double ty = viewPoint.Position.Y; //- viewPoint.Position.Y;
+                //double tz = -viewPoint.Position.Z;// - viewPoint.Position.Z;
+
+                //// R Matrix Variables
+                //double R11 = Math.Cos(beta);
+                //double R12 = Math.Sin(beta) * Math.Sin(dec);
+                //double R13 = Math.Sin(beta) * Math.Cos(dec);
+                //double R21 = 0;
+                //double R22 = Math.Cos(dec);
+                //double R23 = -Math.Sin(dec);
+                //double R31 = -Math.Sin(beta);
+                //double R32 = Math.Cos(beta) * Math.Sin(dec);
+                //double R33 = Math.Cos(beta) * Math.Cos(dec);
+
+                //// Calculate transformed 3D position
+                //double Mprimex = R11 * p.X + R21 * p.Y + R31 * -p.Z + tx;
+                //double Mprimey = R12 * p.X + R22 * p.Y + R32 * -p.Z + ty;
+                //double Mprimez = R13 * p.X + R23 * p.Y + R33 * -p.Z + tz;
+
+                //double px = (Mprimex / -Mprimez) * kmatrix[0, 0] + kmatrix[0, 2];
+                //double py = (Mprimey / -Mprimez) * kmatrix[1, 1] + kmatrix[1, 2];
+
+                //// Perform calculations for x and y pixels
+                //double kx = kmatrix[0, 0] * Mprimex + kmatrix[0, 2] * Mprimez;
+                //double ky = kmatrix[1, 1] * Mprimey + kmatrix[1, 2] * Mprimez;
+                ////double k = Mprime13
+                ////point2D.X = Convert.ToInt32(px);// Convert.ToInt32(kx / Mprimez);
+                ////point2D.Y = Convert.ToInt32(py);//Convert.ToInt32(ky / Mprimez);
+                //point2D.X = Convert.ToInt32(kx / Mprimez);
+                //point2D.Y = Convert.ToInt32(ky / Mprimez);
+
+            // END!
 
             return point2D;
         }

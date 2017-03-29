@@ -382,7 +382,7 @@ namespace VisualHullReconstruction
 
                 if (success)
                 {
-                    for (int i = 10; i < 360; i += 10)
+                    for (int i = 1; i < 360; i += 1)
                     {
                         // Do further testing with rotations
                         Point3D cameraPosition = ImageAnalysis.Calculate3DPosition(i, cameraInitialPosition);
@@ -390,7 +390,11 @@ namespace VisualHullReconstruction
                         point2D = ImageAnalysis.To2DPoint(spaceLocation, vp, kMatrix);
 
                         if (point2D.X < 0 || point2D.X > testImage.Width || point2D.Y < 0 || point2D.Y > testImage.Height)
+                        {
+                            AddLine("Tracking dots left image!");
                             return false;
+                        }
+
 
                         // Draw a little marker at the given location
                         for (int j = 0; j < -size; j++)
