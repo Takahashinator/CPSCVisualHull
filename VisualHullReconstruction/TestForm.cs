@@ -53,6 +53,12 @@ namespace VisualHullReconstruction
             pass = Test3D2D();
             AddLine("Test Test3D2D... " + (pass ? "success!" : "failed!"));
 
+            pass = false;
+            AddLine("");
+            AddLine("Starting TestOctCorners...");
+            pass = TestOctCorners();
+            AddLine("Test TestOctCorners... " + (pass ? "success!" : "failed!"));
+
         }
 
         private void AddLine(string text)
@@ -345,7 +351,6 @@ namespace VisualHullReconstruction
         {
             try
             {
-                bool success = false;
                 double dec = 10.3;
 
                 // Constants
@@ -379,38 +384,38 @@ namespace VisualHullReconstruction
                 pictureBox1.Image = testImage;
 
                 DialogResult result = MessageBox.Show("Dot at correct Location?", "Check Dialog", MessageBoxButtons.YesNo);
-                success = result != DialogResult.No;
+                var success = result != DialogResult.No;
 
-                if (success)
+                if (!success) 
+                    return false;
+
+                for (int i = 1; i < 360; i += 1)
                 {
-                    for (int i = 1; i < 360; i += 1)
+                    // Do further testing with rotations
+                    Point3D cameraPosition = ImageAnalysis.Calculate3DPosition(i, cameraInitialPosition);
+                    vp = new ViewPoint(null, cameraPosition, i, dec);
+                    point2D = ImageAnalysis.To2DPoint(spaceLocation, vp, kMatrix);
+
+                    if (point2D.X < 0 || point2D.X > testImage.Width || point2D.Y < 0 || point2D.Y > testImage.Height)
                     {
-                        // Do further testing with rotations
-                        Point3D cameraPosition = ImageAnalysis.Calculate3DPosition(i, cameraInitialPosition);
-                        vp = new ViewPoint(null, cameraPosition, i, dec);
-                        point2D = ImageAnalysis.To2DPoint(spaceLocation, vp, kMatrix);
-
-                        if (point2D.X < 0 || point2D.X > testImage.Width || point2D.Y < 0 || point2D.Y > testImage.Height)
-                        {
-                            AddLine("Tracking dots left image!");
-                            return false;
-                        }
-
-                        size = -5;
-                        // Draw a little marker at the given location
-                        for (int j = 0; j < -size; j++)
-                        {
-                            for (int k = 0; k < -size; k++)
-                            {
-                                testImage.SetPixel(point2D.X + j, point2D.Y + k, Color.Blue);
-                            }
-                        }
-
-                        pictureBox1.Image = testImage;
+                        AddLine("Tracking dots left image!");
+                        return false;
                     }
-                    result = MessageBox.Show("Do the dots follow the right trajectory?", "Check Dialog", MessageBoxButtons.YesNo);
-                    success = result != DialogResult.No;
+
+                    size = -5;
+                    // Draw a little marker at the given location
+                    for (int j = 0; j < -size; j++)
+                    {
+                        for (int k = 0; k < -size; k++)
+                        {
+                            testImage.SetPixel(point2D.X + j, point2D.Y + k, Color.Blue);
+                        }
+                    }
+
+                    pictureBox1.Image = testImage;
                 }
+                result = MessageBox.Show("Do the dots follow the right trajectory?", "Check Dialog", MessageBoxButtons.YesNo);
+                success = result != DialogResult.No;
 
                 return success;
 
@@ -418,6 +423,55 @@ namespace VisualHullReconstruction
             catch (Exception e)
             {
                 AddLine("Error in Test2D3D!");
+                AddLine(e.Message);
+                return false;
+            }
+        }
+
+        private bool TestOctCorners()
+        {
+            try
+            {
+                bool success = false;
+
+                OctNode root = new OctNode(100, new Point3D(0,0,0));
+                //root.Split();
+
+                List<bool> tests = new List<bool>
+                {
+                    root.Corners.Contains(new Point3D(-50, 0, -50)),
+                    root.Corners.Contains(new Point3D(-50, 0, 50)),
+                    root.Corners.Contains(new Point3D(-50, 100, -50)),
+                    root.Corners.Contains(new Point3D(-50, 100, 50)),
+                    root.Corners.Contains(new Point3D(50, 0, -50)),
+                    root.Corners.Contains(new Point3D(50, 0, 50)),
+                    root.Corners.Contains(new Point3D(50, 100, -50)),
+                    root.Corners.Contains(new Point3D(50, 100, 50))
+                };
+
+
+                int fails = 0;
+                for (int i = 0; i < tests.Count; i++)
+                {
+                    if (tests[i] == false)
+                    {
+                        AddLine("Fail on test # " + i);
+                        fails++;
+                    }
+                }
+
+                AddLine("TestOctCorners completed. Found " + fails + " failures.");
+                if (fails == 0)
+                {
+                    success = true;
+                }
+
+
+                return success;
+            }
+            catch (Exception e)
+            {
+                AddLine("Error in TestOctCorners!");
                 AddLine(e.Message);
                 return false;
             }

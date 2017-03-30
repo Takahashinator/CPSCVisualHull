@@ -150,18 +150,16 @@ namespace VisualHullReconstruction
         /// <returns>A pixel location</returns>
         static public Point To2DPoint(Point3D p, ViewPoint viewPoint, double[,] kmatrix)
         {
-            // NOTE we negate the z axis to get proper camera coordinates
             Point point2D = new Point();
             double beta = (Math.PI / 180)*(180 - viewPoint.ViewAngle); // beta = y axis rotation angle
-            double dec = -(Math.PI/180)*viewPoint.Declination;
+            double dec = -(Math.PI/180)*viewPoint.Declination; // x axis rotation
 
             double alphax = kmatrix[0, 0];
             double alphay = kmatrix[1, 1];
             double px = kmatrix[0, 2];
             double py = kmatrix[1, 2];
 
-            // CRAZYTIME!!!
-            // R Matrix Variables are INVERTED!
+            // Note: R Matrix Variables are INVERTED!
             double R11 = Math.Cos(beta);
             double R21 = Math.Sin(beta) * Math.Sin(dec);
             double R31 = Math.Sin(beta) * Math.Cos(dec);
@@ -197,84 +195,46 @@ namespace VisualHullReconstruction
             point2D.X = Convert.ToInt32(kx / k);
             point2D.Y = Convert.ToInt32(ky / k);
 
-
-            //// Calculate point transform position
-            //double tx = -viewPoint.Position.X; //- viewPoint.Position.X;
-            //double ty = -viewPoint.Position.Y; //- viewPoint.Position.Y;
-            //double tz = -viewPoint.Position.Z;// - viewPoint.Position.Z;
-
-            //// R Matrix Variables
-            //double R11 = Math.Cos(beta);
-            //double R12 = Math.Sin(beta) * Math.Sin(dec);
-            //double R13 = Math.Sin(beta) * Math.Cos(dec);
-            //double R21 = 0;
-            //double R22 = Math.Cos(dec);
-            //double R23 = -Math.Sin(dec);
-            //double R31 = -Math.Sin(beta);
-            //double R32 = Math.Cos(beta)*Math.Sin(dec);
-            //double R33 = Math.Cos(beta)*Math.Cos(dec);
-
-            //// Calculate transformed 3D position
-            //double Mprimex = R11 * p.X + R21 * p.Y + R31 * p.Z + tx;
-            //double Mprimey = R12 * p.X + R22 * p.Y + R32 * p.Z + ty;
-            //double Mprimez = R13 * p.X + R23 * p.Y + R33 * p.Z + tz;
-
-            ////double px = (Mprimex / -Mprimez) * kmatrix[0, 0] + kmatrix[0, 2];
-            ////double py = (Mprimey / -Mprimez) * kmatrix[1, 1] + kmatrix[1, 2];
-
-            //// Perform calculations for x and y pixels
-            //double kx = kmatrix[0, 0] * Mprimex + kmatrix[0, 2] * Mprimez;
-            //double ky = kmatrix[1, 1] * Mprimey + kmatrix[1, 2] * Mprimez;
-            ////double k = Mprime13
-            ////point2D.X = Convert.ToInt32(px);// Convert.ToInt32(kx / Mprimez);
-            ////point2D.Y = Convert.ToInt32(py);//Convert.ToInt32(ky / Mprimez);
-            //point2D.X = Convert.ToInt32(kx / Mprimez);
-            //point2D.Y = Convert.ToInt32(ky / Mprimez);
-
-
-            // THIS WORKS FOR A VERY SPECIFIC POINT!
-
-                //// NOTE we negate the z axis to get proper camera coordinates
-                //Point point2D = new Point();
-                //double beta = (Math.PI / 180) * viewPoint.ViewAngle; // beta = y axis rotation angle
-                //double dec = -(Math.PI / 180) * viewPoint.Declination;
-
-                //// Calculate point transform position
-                //double tx = viewPoint.Position.X; //- viewPoint.Position.X;
-                //double ty = viewPoint.Position.Y; //- viewPoint.Position.Y;
-                //double tz = -viewPoint.Position.Z;// - viewPoint.Position.Z;
-
-                //// R Matrix Variables
-                //double R11 = Math.Cos(beta);
-                //double R12 = Math.Sin(beta) * Math.Sin(dec);
-                //double R13 = Math.Sin(beta) * Math.Cos(dec);
-                //double R21 = 0;
-                //double R22 = Math.Cos(dec);
-                //double R23 = -Math.Sin(dec);
-                //double R31 = -Math.Sin(beta);
-                //double R32 = Math.Cos(beta) * Math.Sin(dec);
-                //double R33 = Math.Cos(beta) * Math.Cos(dec);
-
-                //// Calculate transformed 3D position
-                //double Mprimex = R11 * p.X + R21 * p.Y + R31 * -p.Z + tx;
-                //double Mprimey = R12 * p.X + R22 * p.Y + R32 * -p.Z + ty;
-                //double Mprimez = R13 * p.X + R23 * p.Y + R33 * -p.Z + tz;
-
-                //double px = (Mprimex / -Mprimez) * kmatrix[0, 0] + kmatrix[0, 2];
-                //double py = (Mprimey / -Mprimez) * kmatrix[1, 1] + kmatrix[1, 2];
-
-                //// Perform calculations for x and y pixels
-                //double kx = kmatrix[0, 0] * Mprimex + kmatrix[0, 2] * Mprimez;
-                //double ky = kmatrix[1, 1] * Mprimey + kmatrix[1, 2] * Mprimez;
-                ////double k = Mprime13
-                ////point2D.X = Convert.ToInt32(px);// Convert.ToInt32(kx / Mprimez);
-                ////point2D.Y = Convert.ToInt32(py);//Convert.ToInt32(ky / Mprimez);
-                //point2D.X = Convert.ToInt32(kx / Mprimez);
-                //point2D.Y = Convert.ToInt32(ky / Mprimez);
-
-            // END!
-
             return point2D;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node">The Octnode to calculate bounding square</param>
+        /// <returns>The state of the node</returns>
+        static public OctoState IsInSillhouette(OctNode node, ViewPoint vp, double[,] kmat)
+        {
+            //foreach corner
+                //check in sillhouette area
+                // if all in return full
+                // if all out return empty
+                // if some in and some out return ambiguous
+            bool allIn = true;
+            bool allOut = true;
+            foreach (var corner in node.Corners)
+            {
+                Point p = To2DPoint(corner, vp, kmat);
+                if (vp.ImageMap[p.Y, p.X] >= 1)
+                {
+                    //The Point is in sillhouette region
+                    allOut = false;
+                }
+                else
+                {
+                    allIn = false;
+                }
+            }
+
+            if (allIn && !allOut)
+                return OctoState.Full;
+            if (allOut && !allIn)
+                return OctoState.Empty;
+            
+            return OctoState.Ambiguous;
+            
+
+        }
     }
+
 }
