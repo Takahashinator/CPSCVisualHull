@@ -346,6 +346,7 @@ namespace VisualHullReconstruction
             try
             {
                 bool success = false;
+                double dec = 10.3;
 
                 // Constants
                 Point3D cameraInitialPosition = new Point3D(0, 100, -370);
@@ -359,14 +360,14 @@ namespace VisualHullReconstruction
                 double angle = 0;
                 Point3D spaceLocation = new Point3D(0, 0, -94.5); // Point to follow
                 //Point3D cameraPosition = ImageAnalysis.Calculate3DPosition(angle, cameraInitialPosition); 
-                ViewPoint vp = new ViewPoint(null, cameraInitialPosition, angle, 11.55);
+                ViewPoint vp = new ViewPoint(null, cameraInitialPosition, angle, dec);
                 Point point2D = ImageAnalysis.To2DPoint(spaceLocation, vp, kMatrix);
 
                 if (point2D.X < 0 || point2D.X > testImage.Width || point2D.Y < 0 || point2D.Y > testImage.Height)
                     return false;
 
                 // Draw a little marker at the given location
-                int size = -15;
+                int size = -10;
                 for (int i = 0; i < -size; i++)
                 {
                     for (int j = 0; j < -size; j++)
@@ -386,7 +387,7 @@ namespace VisualHullReconstruction
                     {
                         // Do further testing with rotations
                         Point3D cameraPosition = ImageAnalysis.Calculate3DPosition(i, cameraInitialPosition);
-                        vp = new ViewPoint(null, cameraPosition, i, 11.55);
+                        vp = new ViewPoint(null, cameraPosition, i, dec);
                         point2D = ImageAnalysis.To2DPoint(spaceLocation, vp, kMatrix);
 
                         if (point2D.X < 0 || point2D.X > testImage.Width || point2D.Y < 0 || point2D.Y > testImage.Height)
@@ -395,7 +396,7 @@ namespace VisualHullReconstruction
                             return false;
                         }
 
-
+                        size = -5;
                         // Draw a little marker at the given location
                         for (int j = 0; j < -size; j++)
                         {
