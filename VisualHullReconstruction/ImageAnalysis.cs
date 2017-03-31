@@ -212,9 +212,12 @@ namespace VisualHullReconstruction
                 // if some in and some out return ambiguous
             bool allIn = true;
             bool allOut = true;
-            foreach (var corner in node.Corners)
+            foreach (var corner in node.GetCorners())
             {
                 Point p = To2DPoint(corner, vp, kmat);
+                if (p.Y > vp.ImageMap.GetLength(0) || p.X > vp.ImageMap.GetLength(1))
+                    throw new IndexOutOfRangeException();
+
                 if (vp.ImageMap[p.Y, p.X] >= 1)
                 {
                     //The Point is in sillhouette region
@@ -224,6 +227,8 @@ namespace VisualHullReconstruction
                 {
                     allIn = false;
                 }
+                if (!allIn && !allOut)
+                    break;
             }
 
             if (allIn && !allOut)

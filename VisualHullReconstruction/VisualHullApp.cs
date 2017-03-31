@@ -33,8 +33,7 @@ namespace VisualHullReconstruction
         private double currentSideLength = Sidelength;
         private static readonly Point3D CameraInitialPosition = new Point3D(0, 100, -370);
         private const double dec = 10.3;
-        private Stack<OctNode> nodeStack = new Stack<OctNode>(); //Stack used for exporting octree
-
+        private Queue<OctNode> octoQueue = new Queue<OctNode>(); 
 
         private OctNode _root = new OctNode(Sidelength, new Point3D(0,0,0));
         private List<ViewPoint> _viewPointList;
@@ -77,14 +76,22 @@ namespace VisualHullReconstruction
 
             // Start with 4x4 octree
             _root.Split();
-            currentSideLength/=2;
-            _root.State = OctoState.Ambiguous;;
+            _root.State = OctoState.Ambiguous;
             foreach (var child in _root.Children)
             {
                 child.Split();
                 child.State = OctoState.Ambiguous;
+                foreach (var grandchild in child.Children)
+                {
+                    grandchild.Split();
+                    grandchild.State = OctoState.Ambiguous;
+                    foreach (var greatGrandchild in grandchild.Children)
+                    {
+                        octoQueue.Enqueue(greatGrandchild);
+                        currentSideLength = greatGrandchild.SideLength;
+                    }
+                }
             }
-            currentSideLength /= 2;
         }
 
         private void buttonLoadImages_Click(object sender, EventArgs e)
@@ -146,7 +153,7 @@ namespace VisualHullReconstruction
 
 
                 if (dlg.ShowDialog() != DialogResult.OK) return;
-
+                Cursor.Current = Cursors.WaitCursor;
                 foreach (string filename in dlg.FileNames)
                 {
                     try
@@ -186,6 +193,7 @@ namespace VisualHullReconstruction
                                         "it may be corrupt.\n\nReported error: " + ex.Message);
                     }
                 }
+                Cursor.Current = Cursors.Default;
             }
 
         }
@@ -197,48 +205,73 @@ namespace VisualHullReconstruction
                 MessageBox.Show("No Sillhouette images loaded!");
                 return;
             }
-
+            Cursor.Current = Cursors.WaitCursor;
             // Do the main octree work
-            var octoQueue = EnqueueTree();
-            //int splitcounter = 0;
-            while (octoQueue.Count != 0 && currentSideLength >= MinSideLength)
+            //octoQueue = EnqueueTree();
+
+            while (octoQueue.Count != 0)
             {
                 OctNode node = octoQueue.Dequeue();
-                bool allOut = true;
-                bool allIn = true;
+
+                bool allFull = true;
                 foreach (var image in _viewPointList)
                 {
                     OctoState state = ImageAnalysis.IsInSillhouette(node, image, _kMatrix);
-                    if (state == OctoState.Full)
-                        allOut = false;
-                    else
-                        allIn = false;
-                }
-
-                if (allIn && !allOut)
-                    node.State = OctoState.Full;
-                else if (allOut && !allIn)
-                    node.State = OctoState.Empty;
-                else
-                {
-                    //splitcounter++;
-                    node.State = OctoState.Ambiguous;
-                    node.Split();
-                    currentSideLength = node.Children[0].SideLength < currentSideLength? node.Children[0].SideLength : currentSideLength;
-                    foreach (var child in node.Children)
+                    if (state == OctoState.Ambiguous)
                     {
-                        octoQueue.Enqueue(child);
+                        allFull = false;
+                    }                       
+                    else if (state == OctoState.Empty)
+                    {
+                        // Empty means completely outside the sillhouette
+                        node.State = OctoState.Empty;
+                        allFull = false;
+                        break;
+                    }
+                }    
+                
+                if (allFull)
+                {
+                    node.State = OctoState.Full;
+                }
+                else if (!allFull && node.State != OctoState.Empty)
+                { // node is not full or empty: is ("Ambiguous")
+                    if (node.SideLength / 2 >= MinSideLength)
+                    {
+                        node.State = OctoState.Ambiguous;
+                        node.Split();
+                        foreach (var child in node.Children)
+                        {
+                            octoQueue.Enqueue(child);
+                        }
+                    } 
+                    else
+                    {
+                        // no more splitting, but set ambiguous node to EMPTY (could also set to full)
+                        node.State = OctoState.Empty;
                     }
                 }
             }
 
             _root.Compact();
-            EnqueueChildren(_root);
-            ExportTree();
-
-            // By this point we should have a full octree!
-            string book = "awesome";
-            string awesome = "I am" + book;
+            //StackChildren(_root);
+            try
+            {
+                using (StreamWriter file = new StreamWriter(@"C:\Users\tttakaha\Desktop\Octree.txt"))
+                {
+                    OctNode.ExportTree(_root, file);
+                }
+                MessageBox.Show("Tree successfully saved to file.");
+            }
+            catch(IOException E)
+            {
+                MessageBox.Show("Error when writing tree to file! (Probably need to change the path)\n" + E.Message);
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show("Error in export function! \n " + exception.Message);
+            }
+            Cursor.Current = Cursors.Default;
         }
 
         /// <summary>
@@ -256,51 +289,30 @@ namespace VisualHullReconstruction
             testForm.Show();
         }
 
-        private Queue<OctNode> EnqueueTree()
-        {
-            var queue = new Queue<OctNode>();
-            foreach (var child in _root.Children.SelectMany(child1 => child1.Children))
-            {
-                queue.Enqueue(child);
-            }
-            return queue;
-        }
+        //private Queue<OctNode> EnqueueTree()
+        //{
+        //    var queue = new Queue<OctNode>();
+        //    foreach (var child in _root.Children)
+        //    {
+        //        foreach (var grandchild in child.Children)
+        //            foreach (var greatGrandchild in grandchild.Children)
+        //                queue.Enqueue(greatGrandchild);
+        //    }
+        //    return queue;
+        //}
 
-        private void EnqueueChildren(OctNode node)
-        {
-            if (node.Children != null)
-                foreach (var child in node.Children)
-                {
-                    EnqueueChildren(child);
-                }
-            else
-            {
-                if (node.State == OctoState.Full)
-                    nodeStack.Push(node);
-            }
-        }
-
-        /// <summary>
-        /// Exports the octree so it can be visualized in OpenGL
-        /// </summary>
-        public void ExportTree()
-        {
-            // Need size length and origin position
-            // Only care about full cubes
-            if (nodeStack.Count <= 0)
-                return;
-            using (StreamWriter file = new StreamWriter(@"C:\Users\Takahashi Home\Documents\Visual Studio 2013\Projects\VisualHullReconstruction\Octree.txt"))
-            {
-                while (nodeStack.Count > 0)
-                {
-                    OctNode node = nodeStack.Pop();
-                    string line = node.SideLength.ToString(CultureInfo.InvariantCulture) + " " +
-                                  node.Point.X.ToString(CultureInfo.InvariantCulture) + " " +
-                                  (node.Point.Y + node.SideLength / 2).ToString(CultureInfo.InvariantCulture) + " " +
-                                  node.Point.Z.ToString(CultureInfo.InvariantCulture);
-                    file.WriteLine(line);
-                }
-            }
-        }
+        //private void StackChildren(OctNode node)
+        //{
+        //    if (node.Children != null)
+        //        foreach (var child in node.Children)
+        //        {
+        //            StackChildren(child);
+        //        }
+        //    else
+        //    {
+        //        if (node.State == OctoState.Full)
+        //            nodeStack.Push(node);
+        //    }
+        //}
     }
 }
